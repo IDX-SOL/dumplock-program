@@ -1,0 +1,30 @@
+# Anchor build artifacts
+target/
+**/target/
+
+# Node
+node_modules/
+
+# Keys & Secrets
+*.json
+*.key
+*.pem
+
+# Env files
+.env
+.env.*
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Test validator
+test-ledger/
+
+# Archive files
+*.tar
+*.tar.gz
+*.tar.bz2
+
