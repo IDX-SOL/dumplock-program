@@ -12,6 +12,7 @@ onchain_dumplock = "GoB3WxFTNYh8kqicpC1eYjnJCx9qpcy2TuGsVqB38pmz"
 
 [provider]
 cluster = "mainnet"
+wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "mocha tests/dumplock_program.js"

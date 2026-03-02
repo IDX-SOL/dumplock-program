@@ -17,8 +17,10 @@ cpi = ["no-entrypoint"]
 # 🧪 Enable slot-based timing for tests
 slot-time = []
 
+
 default = []
 
 [dependencies]
-anchor-lang = "0.30.1"
-anchor-spl = "0.30.1"
+anchor-lang = "0.29.0"
+anchor-spl = "0.29.0"
+solana-security-txt = "1.1.1"

@@ -1,6 +1,18 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 use anchor_spl::associated_token::AssociatedToken;
+use solana_security_txt::security_txt;
+
+security_txt! {
+    name: "DumpLock",
+    project_url: "https://dumplock.io",
+    contacts: "mailto:security@dumplock.io",
+    policy: "https://dumplock.io/security",
+    preferred_languages: "en",
+    source_code: "https://github.com/IDX-SOL/dumplock-program",
+    auditors: "None",
+    acknowledgements: "https://dumplock.io"
+}
 
 declare_id!("GoB3WxFTNYh8kqicpC1eYjnJCx9qpcy2TuGsVqB38pmz");
 
