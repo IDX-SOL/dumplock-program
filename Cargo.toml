@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "programs/dumplock_program"
+]
+
+resolver = "2"
