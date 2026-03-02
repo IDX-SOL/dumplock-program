@@ -1,6 +1,7 @@
 [workspace]
-members = [
-    "programs/dumplock_program"
-]
-
+members = ["programs/dumplock_program"]
 resolver = "2"
+
+[workspace.dependencies]
+anchor-lang = "=0.29.0"
+anchor-spl = "=0.29.0"
