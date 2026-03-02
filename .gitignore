@@ -2,6 +2,15 @@
 target/
 **/target/
 
+# Solana program binaries
+*.so
+
+# Local deployment / dump artifacts
+deployed.so
+chain.so
+current_chain.so
+recovered-buffer.json
+
 # Node
 node_modules/
 
@@ -27,4 +36,3 @@ test-ledger/
 *.tar
 *.tar.gz
 *.tar.bz2
-
