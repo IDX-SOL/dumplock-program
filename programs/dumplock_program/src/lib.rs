@@ -1,7 +1,9 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
+use anchor_lang::system_program::{self, Transfer as SystemTransfer};
+use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer as TokenTransfer};
 use anchor_spl::associated_token::AssociatedToken;
 use solana_security_txt::security_txt;
+use std::str::FromStr;
 
 security_txt! {
     name: "DumpLock",
@@ -16,6 +18,9 @@ security_txt! {
 
 declare_id!("GoB3WxFTNYh8kqicpC1eYjnJCx9qpcy2TuGsVqB38pmz");
 
+const TREASURY_WALLET: &str = "DPByYJaAF7vxiBUCj3JcV58EZYN539xEMr1hJzUrdc7s";
+const LOCK_FEE_LAMPORTS: u64 = 50_000_000;
+
 #[program]
 pub mod onchain_dumplock {
     use super::*;
@@ -25,6 +30,14 @@ pub mod onchain_dumplock {
         lock_percent: u8,
         lock_duration_hours: u64,
     ) -> Result<()> {
+        let treasury_wallet = Pubkey::from_str(TREASURY_WALLET)
+            .map_err(|_| error!(DumpLockError::InvalidTreasury))?;
+
+        require_keys_eq!(
+            ctx.accounts.treasury.key(),
+            treasury_wallet,
+            DumpLockError::InvalidTreasury
+        );
 
         require!(
             lock_percent == 95 || lock_percent == 97 || lock_percent == 99,
@@ -92,7 +105,19 @@ pub mod onchain_dumplock {
         state.mint_authority_was_active = mint_authority_was_active;
         state.freeze_authority_was_active = freeze_authority_was_active;
 
-        let cpi_accounts = Transfer {
+        let fee_accounts = SystemTransfer {
+            from: ctx.accounts.creator.to_account_info(),
+            to: ctx.accounts.treasury.to_account_info(),
+        };
+
+        let fee_ctx = CpiContext::new(
+            ctx.accounts.system_program.to_account_info(),
+            fee_accounts,
+        );
+
+        system_program::transfer(fee_ctx, LOCK_FEE_LAMPORTS)?;
+
+        let cpi_accounts = TokenTransfer {
             from: creator_ata.to_account_info(),
             to: ctx.accounts.vault_ata.to_account_info(),
             authority: ctx.accounts.creator.to_account_info(),
@@ -159,7 +184,7 @@ pub mod onchain_dumplock {
         let seeds = &[b"lock", mint.as_ref(), &[bump]];
         let signer = &[&seeds[..]];
 
-        let cpi_accounts = Transfer {
+        let cpi_accounts = TokenTransfer {
             from: ctx.accounts.vault_ata.to_account_info(),
             to: ctx.accounts.creator_ata.to_account_info(),
             authority: ctx.accounts.lock_state.to_account_info(),
@@ -210,6 +235,9 @@ pub struct Lock<'info> {
         associated_token::authority = lock_state
     )]
     pub vault_ata: Account<'info, TokenAccount>,
+
+    #[account(mut)]
+    pub treasury: SystemAccount<'info>,
 
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,
@@ -296,6 +324,8 @@ pub enum DumpLockError {
     AlreadyUnlocked,
     #[msg("This mint has already been locked and cannot be reused")]
     LockAlreadyUsed,
+    #[msg("Invalid treasury account")]
+    InvalidTreasury,
     #[msg("Math overflow detected")]
     MathOverflow,
 }

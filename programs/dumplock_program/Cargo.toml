@@ -17,7 +17,6 @@ cpi = ["no-entrypoint"]
 # 🧪 Enable slot-based timing for tests
 slot-time = []
 
-
 default = []
 
 [dependencies]
