@@ -56,11 +56,16 @@ pub mod onchain_dumplock {
 
         let total_supply = mint.supply;
 
-        let locked_amount = total_supply
-            .checked_mul(lock_percent as u64)
+        // Use u128 for the intermediate multiplication so large 9-decimal token
+        // supplies do not overflow before dividing by 100.
+        let locked_amount_u128 = u128::from(total_supply)
+            .checked_mul(u128::from(lock_percent))
             .ok_or(DumpLockError::MathOverflow)?
             .checked_div(100)
             .ok_or(DumpLockError::MathOverflow)?;
+
+        let locked_amount = u64::try_from(locked_amount_u128)
+            .map_err(|_| error!(DumpLockError::MathOverflow))?;
 
         require!(
             creator_ata.amount >= locked_amount,
